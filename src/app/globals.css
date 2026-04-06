@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap");
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-mono;
+  }
+
+  ::selection {
+    background: rgba(200, 255, 0, 0.3);
+    color: #F5F0E8;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0D0D0D;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3A3A3A;
+  }
+}
+
+@layer components {
+  .shimmer-button {
+    position: relative;
+    overflow: hidden;
+    background: #C8FF00;
+    color: #0D0D0D;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .shimmer-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  .shimmer-button:hover {
+    box-shadow: 0 0 30px rgba(200, 255, 0, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .spotlight-card {
+    position: relative;
+    background: #141414;
+    border: 1px solid #2A2A2A;
+    overflow: hidden;
+  }
+
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    top: var(--mouse-y, 50%);
+    left: var(--mouse-x, 50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(200, 255, 0, 0.06), transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+
+  .magnetic-button {
+    transition: transform 0.2s ease-out;
+  }
+
+  .animated-input {
+    background: #141414;
+    border: 1px solid #2A2A2A;
+    transition: all 0.3s ease;
+  }
+
+  .animated-input:focus {
+    border-color: #C8FF00;
+    box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.1);
+    outline: none;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #F5F0E8 0%, #C8FF00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .line-connector {
+    position: relative;
+  }
+
+  .line-connector::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -50%;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, #C8FF00, transparent);
+  }
+}

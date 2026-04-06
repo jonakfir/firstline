@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" width="200" height="40">
+  <!-- Favicon mark -->
+  <g transform="translate(4, 4)">
+    <path d="M6 0 L18 32" stroke="#C8FF00" stroke-width="3.2" stroke-linecap="round"/>
+    <line x1="5" y1="10" x2="17" y2="10" stroke="#C8FF00" stroke-width="3.2" stroke-linecap="round"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="34" y="28" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700" fill="#F5F0E8" letter-spacing="0.5">Firstline</text>
+</svg>
