@@ -5,7 +5,11 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 import { enrichLinkedIn, fetchCompanyNews, verifyEmail } from "@/lib/enrichment";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let _anthropic: Anthropic | null = null;
+function getAnthropic() {
+  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return _anthropic;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -66,7 +70,7 @@ export async function POST(req: NextRequest) {
 
             // Generate opening line with Claude
             const context = buildContext(lead, enrichedData);
-            const message = await anthropic.messages.create({
+            const message = await getAnthropic().messages.create({
               model: "claude-sonnet-4-20250514",
               max_tokens: 100,
               messages: [
