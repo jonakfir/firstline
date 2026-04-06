@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -15,25 +15,46 @@ export default function ScrollReveal({
   delay = 0,
   direction = "up",
 }: ScrollRevealProps) {
-  const initial = {
-    opacity: 0,
-    y: direction === "up" ? 40 : 0,
-    x: direction === "left" ? -40 : direction === "right" ? 40 : 0,
-  };
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setIsVisible(true), delay * 1000);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  const transform = !isVisible
+    ? direction === "up"
+      ? "translateY(40px)"
+      : direction === "left"
+      ? "translateX(-40px)"
+      : "translateX(40px)"
+    : "translateY(0) translateX(0)";
 
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={className}
-      initial={initial}
-      whileInView={{ opacity: 1, y: 0, x: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{
-        duration: 0.7,
-        delay,
-        ease: [0.25, 0.46, 0.45, 0.94],
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform,
+        transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
       }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

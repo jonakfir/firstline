@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { useRef, useCallback, useEffect, useState } from "react";
 
 interface SpotlightCardProps {
   children: React.ReactNode;
@@ -15,6 +14,25 @@ export default function SpotlightCard({
   delay = 0,
 }: SpotlightCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setIsVisible(true), delay * 1000);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
@@ -26,16 +44,17 @@ export default function SpotlightCard({
   }, []);
 
   return (
-    <motion.div
+    <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
       className={`spotlight-card rounded-sm p-6 ${className}`}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? "translateY(0)" : "translateY(30px)",
+        transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+      }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

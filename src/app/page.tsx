@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import ShimmerButton from "@/components/ShimmerButton";
 import SpotlightCard from "@/components/SpotlightCard";
 import ScrollReveal from "@/components/ScrollReveal";
-import { motion } from "framer-motion";
 
 const WebGLHero = dynamic(() => import("@/components/WebGLHero"), {
   ssr: false,
@@ -93,47 +92,28 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <WebGLHero />
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="text-caption uppercase tracking-[0.2em] text-accent-lime mb-6"
-          >
+          <p className="hero-fade-up hero-fade-up-1 text-caption uppercase tracking-[0.2em] text-accent-lime mb-6">
             AI-powered cold email openers
-          </motion.p>
+          </p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="font-serif text-display-xl md:text-[7rem] leading-[0.95] tracking-[-0.04em] mb-8"
-          >
+          <h1 className="hero-fade-up hero-fade-up-2 font-serif text-display-xl md:text-[7rem] leading-[0.95] tracking-[-0.04em] mb-8">
             The first line
             <br />
             <span className="italic text-accent-lime">that opens</span>
             <br />
             the door.
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="text-body-lg text-text-secondary max-w-xl mx-auto mb-10"
-          >
+          <p className="hero-fade-up hero-fade-up-3 text-body-lg text-text-secondary max-w-xl mx-auto mb-10">
             Upload your lead list. Get personalized openers
             <br className="hidden sm:block" /> for every single one.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-          >
+          <div className="hero-fade-up hero-fade-up-4">
             <ShimmerButton href="/signup" size="lg">
               Start for free →
             </ShimmerButton>
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom gradient fade */}
