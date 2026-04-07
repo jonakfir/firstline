@@ -62,12 +62,13 @@ export default function ListsPage() {
       ) : (
         <div className="space-y-3">
           {lists.map((list) => (
-            <div
+            <Link
               key={list.id}
-              className="spotlight-card rounded-sm p-5 flex items-center justify-between"
+              href={`/dashboard/lists/${list.id}`}
+              className="spotlight-card rounded-sm p-5 flex items-center justify-between group hover:border-accent-lime/20 transition-colors block"
             >
               <div>
-                <h3 className="text-body-md font-medium text-text-primary">
+                <h3 className="text-body-md font-medium text-text-primary group-hover:text-accent-lime transition-colors">
                   {list.name}
                 </h3>
                 <div className="flex items-center gap-4 mt-1 text-body-sm text-text-muted">
@@ -82,15 +83,23 @@ export default function ListsPage() {
                   </span>
                 </div>
               </div>
-              {list.status === "completed" && (
-                <a
-                  href={`/api/export/${list.id}`}
-                  className="px-4 py-2 rounded-xs text-body-sm border border-border hover:border-accent-lime/30 hover:text-accent-lime transition-colors"
-                >
-                  ↓ Export
-                </a>
-              )}
-            </div>
+              <div className="flex items-center gap-3">
+                {list.status === "completed" && (
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = `/api/export/${list.id}`;
+                    }}
+                    className="px-4 py-2 rounded-xs text-body-sm border border-border hover:border-accent-lime/30 hover:text-accent-lime transition-colors"
+                  >
+                    ↓ Export
+                  </span>
+                )}
+                <span className="text-text-muted group-hover:text-accent-lime transition-colors">
+                  →
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       )}
