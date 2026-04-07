@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map(e => e.trim().toLowerCase());
+
 const PLAN_LABELS: Record<string, { name: string; limit: string }> = {
+  admin: { name: "Admin", limit: "Unlimited leads" },
   free: { name: "Free", limit: "50 leads/month" },
   pro: { name: "Pro", limit: "2,000 leads/month" },
   agency: { name: "Agency", limit: "Unlimited leads" },
@@ -42,7 +45,8 @@ export default function SettingsPage() {
     return <div className="text-body-sm text-red-400">Profile not found</div>;
   }
 
-  const planInfo = PLAN_LABELS[profile.plan] || PLAN_LABELS.free;
+  const isUserAdmin = ADMIN_EMAILS.includes((profile.email || "").toLowerCase());
+  const planInfo = isUserAdmin ? PLAN_LABELS.admin : (PLAN_LABELS[profile.plan] || PLAN_LABELS.free);
 
   return (
     <div className="max-w-2xl">
@@ -94,7 +98,7 @@ export default function SettingsPage() {
               </span>
             </div>
           </div>
-          {profile.plan === "free" && (
+          {profile.plan === "free" && !isUserAdmin && (
             <a
               href="/#pricing"
               className="shimmer-button inline-flex mt-5 px-5 py-2.5 rounded-xs text-body-sm font-medium"

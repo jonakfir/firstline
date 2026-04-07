@@ -50,7 +50,7 @@ const PLANS = [
   },
   {
     name: "Pro",
-    price: "$49",
+    price: "$19",
     period: "/mo",
     leads: "2,000 leads/mo",
     features: [
@@ -66,7 +66,7 @@ const PLANS = [
   },
   {
     name: "Agency",
-    price: "$199",
+    price: "$49",
     period: "/mo",
     leads: "Unlimited leads",
     features: [
