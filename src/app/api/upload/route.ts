@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { isAdmin } from "@/lib/admin";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
@@ -24,14 +25,16 @@ export async function POST(req: NextRequest) {
 
     if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-    const limits: Record<string, number> = { free: 50, pro: 2000, agency: Infinity };
-    const limit = limits[profile.plan] ?? 50;
-    const remaining = limit - profile.leads_used_this_month;
+    if (!isAdmin(user.email ?? undefined)) {
+      const limits: Record<string, number> = { free: 50, pro: 2000, agency: Infinity };
+      const limit = limits[profile.plan] ?? 50;
+      const remaining = limit - profile.leads_used_this_month;
 
-    if (leads.length > remaining) {
-      return NextResponse.json({
-        error: `Plan limit: ${remaining} leads remaining this month. Upgrade for more.`,
-      }, { status: 403 });
+      if (leads.length > remaining) {
+        return NextResponse.json({
+          error: `Plan limit: ${remaining} leads remaining this month. Upgrade for more.`,
+        }, { status: 403 });
+      }
     }
 
     // Create lead list
