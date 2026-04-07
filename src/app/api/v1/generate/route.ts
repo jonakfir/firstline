@@ -14,7 +14,7 @@ async function callClaude(prompt: string): Promise<string> {
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
-      max_tokens: 100,
+      max_tokens: 300,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
 
         // Generate with Claude
         const openingLine = await callClaude(
-          `Write a single sentence (max 20 words) personalized cold email opener for this person. Be specific. Reference something real from their profile or company news. Do not mention the sender. Do not start with "I". Make it feel human and researched.\n\nContext:\n${context}`
+          `Write a complete, short personalized cold email for this person. The email should:\n- Start with a personalized opening line referencing something real from their profile or company news\n- Be 3-5 sentences total\n- Include a clear, specific value proposition\n- End with a soft call to action (e.g. "Worth a quick chat?")\n- Do not include a subject line\n- Do not include greetings like "Hi [Name]" — start directly with the personalized opener\n- Do not include a sign-off or signature\n- Make it feel human, researched, and conversational — not salesy\n\nContext:\n${context}`
         );
 
         results.push({
