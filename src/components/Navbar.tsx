@@ -15,10 +15,10 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8 text-body-sm text-text-secondary">
-          <a href="#how-it-works" className="hover:text-text-primary transition-colors">
+          <a href="/#how-it-works" className="hover:text-text-primary transition-colors">
             How it works
           </a>
-          <a href="#pricing" className="hover:text-text-primary transition-colors">
+          <a href="/#pricing" className="hover:text-text-primary transition-colors">
             Pricing
           </a>
           <Link href="/login" className="hover:text-text-primary transition-colors">
@@ -48,10 +48,10 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden border-t border-border/50 bg-bg-primary/95 backdrop-blur-md">
           <div className="flex flex-col px-6 py-4 gap-4 text-body-sm text-text-secondary">
-            <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="hover:text-text-primary transition-colors">
+            <a href="/#how-it-works" onClick={() => setMobileOpen(false)} className="hover:text-text-primary transition-colors">
               How it works
             </a>
-            <a href="#pricing" onClick={() => setMobileOpen(false)} className="hover:text-text-primary transition-colors">
+            <a href="/#pricing" onClick={() => setMobileOpen(false)} className="hover:text-text-primary transition-colors">
               Pricing
             </a>
             <Link href="/login" onClick={() => setMobileOpen(false)} className="hover:text-text-primary transition-colors">
