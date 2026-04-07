@@ -65,7 +65,7 @@
       rgba(255, 255, 255, 0.3),
       transparent
     );
-    animation: shimmer 2.5s ease-in-out infinite;
+    animation: shimmerSlide 2.5s ease-in-out infinite;
   }
 
   .shimmer-button:hover {
@@ -149,6 +149,11 @@
     height: 1px;
     background: linear-gradient(90deg, #C8FF00, transparent);
   }
+}
+
+@keyframes shimmerSlide {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 @keyframes heroFadeIn {

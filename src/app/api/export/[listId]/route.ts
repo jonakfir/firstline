@@ -43,7 +43,7 @@ export async function GET(
   return new Response(csvRows.join("\n"), {
     headers: {
       "Content-Type": "text/csv",
-      "Content-Disposition": `attachment; filename="${list.name || "leads"}.csv"`,
+      "Content-Disposition": `attachment; filename="${(list.name || "leads").replace(/[^\w\s-]/g, "").trim()}.csv"`,
     },
   });
 }
