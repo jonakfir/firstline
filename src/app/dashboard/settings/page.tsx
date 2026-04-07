@@ -58,6 +58,20 @@ export default function SettingsPage() {
     setApiKeyLoading(false);
   };
 
+  const handleUpgrade = async (priceId: string) => {
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      // ignore
+    }
+  };
+
   const copyKey = () => {
     if (apiKey) {
       navigator.clipboard.writeText(apiKey);
@@ -123,17 +137,25 @@ export default function SettingsPage() {
             <div className="flex justify-between">
               <span className="text-text-secondary">Used this month</span>
               <span className="text-text-primary">
-                {profile.leads_used_this_month} leads
+                {profile.leads_used_this_month} {profile.leads_used_this_month === 1 ? "lead" : "leads"}
               </span>
             </div>
           </div>
           {profile.plan === "free" && !isUserAdmin && (
-            <a
-              href="/#pricing"
-              className="shimmer-button inline-flex mt-5 px-5 py-2.5 rounded-xs text-body-sm font-medium"
-            >
-              Upgrade plan →
-            </a>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "")}
+                className="shimmer-button px-5 py-2.5 rounded-xs text-body-sm font-medium"
+              >
+                Upgrade to Pro ($19/mo)
+              </button>
+              <button
+                onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID || "")}
+                className="px-5 py-2.5 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm font-medium"
+              >
+                Upgrade to Agency ($49/mo)
+              </button>
+            </div>
           )}
         </div>
 

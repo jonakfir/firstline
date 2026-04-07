@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignupPage() {
+const PLAN_NAMES: Record<string, string> = {
+  pro: "Pro",
+  agency: "Agency",
+};
+
+function SignupContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,6 +19,9 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedPlan = searchParams.get("plan") || "";
+  const planName = PLAN_NAMES[selectedPlan] || "";
 
   const handleOAuth = async (provider: "google" | "linkedin_oidc") => {
     setLoading(true);
@@ -69,9 +77,13 @@ export default function SignupPage() {
           </div>
         )}
 
-        <h1 className="font-serif text-heading-lg mb-2">Create your account</h1>
+        <h1 className="font-serif text-heading-lg mb-2">
+          {planName ? `Start your ${planName} plan` : "Create your account"}
+        </h1>
         <p className="text-body-sm text-text-secondary mb-8">
-          Start generating personalized openers — free.
+          {planName
+            ? `Create an account to start your ${planName} subscription.`
+            : "Start generating personalized openers — free."}
         </p>
 
         <div className="space-y-3 mb-8">
@@ -129,7 +141,7 @@ export default function SignupPage() {
             disabled={loading}
             className="shimmer-button w-full px-4 py-3 rounded-xs text-body-sm font-medium disabled:opacity-50"
           >
-            {loading ? "Creating account..." : "Create free account"}
+            {loading ? "Creating account..." : planName ? `Create account & start ${planName}` : "Create free account"}
           </button>
         </form>
 
@@ -145,5 +157,13 @@ export default function SignupPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-primary" />}>
+      <SignupContent />
+    </Suspense>
   );
 }
