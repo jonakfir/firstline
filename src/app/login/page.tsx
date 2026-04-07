@@ -3,16 +3,20 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 function LoginContent() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [mode, setMode] = useState<"password" | "magic">("password");
   const supabase = createClient();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     if (searchParams.get("error") === "auth_failed") {
@@ -27,6 +31,20 @@ function LoginContent() {
       options: { redirectTo: `${window.location.origin}/api/auth/callback` },
     });
     if (error) setError("Could not connect to sign-in provider. Please try again.");
+    setLoading(false);
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError("Invalid email or password.");
+    } else {
+      router.push("/dashboard");
+    }
     setLoading(false);
   };
 
@@ -98,23 +116,65 @@ function LoginContent() {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <form onSubmit={handleMagicLink} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
-            required
-            className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-3 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm font-medium disabled:opacity-50"
-          >
-            {loading ? "Sending..." : "Send magic link"}
-          </button>
-        </form>
+        {mode === "password" ? (
+          <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              required
+              className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-3 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm font-medium disabled:opacity-50"
+            >
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("magic")}
+              className="w-full text-body-sm text-text-muted hover:text-text-secondary transition-colors text-center"
+            >
+              Use magic link instead
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleMagicLink} className="space-y-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              required
+              className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-3 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm font-medium disabled:opacity-50"
+            >
+              {loading ? "Sending..." : "Send magic link"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("password")}
+              className="w-full text-body-sm text-text-muted hover:text-text-secondary transition-colors text-center"
+            >
+              Use password instead
+            </button>
+          </form>
+        )}
 
         {message && (
           <p className="mt-4 text-body-sm text-accent-lime">{message}</p>

@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const supabase = createClient();
+  const router = useRouter();
 
   const handleOAuth = async (provider: "google" | "linkedin_oidc") => {
     setLoading(true);
@@ -17,19 +21,33 @@ export default function SignupPage() {
       provider,
       options: { redirectTo: `${window.location.origin}/api/auth/callback` },
     });
-    if (error) setMessage(error.message);
+    if (error) setError("Could not connect to sign-in provider. Please try again.");
     setLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
+    setError("");
+    setMessage("");
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
+      password,
       options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
     });
-    if (error) setMessage(error.message);
-    else setMessage("Check your email to confirm your account.");
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setMessage("Check your email to confirm your account, or log in if already confirmed.");
+    }
     setLoading(false);
   };
 
@@ -44,6 +62,12 @@ export default function SignupPage() {
         <Link href="/" className="block mb-12">
           <img src="/logo.svg" alt="Firstline" className="h-7" />
         </Link>
+
+        {error && (
+          <div className="mb-6 px-4 py-3 rounded-xs bg-red-500/10 border border-red-500/20 text-body-sm text-red-400">
+            {error}
+          </div>
+        )}
 
         <h1 className="font-serif text-heading-lg mb-2">Create your account</h1>
         <p className="text-body-sm text-text-secondary mb-8">
@@ -89,6 +113,15 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@company.com"
             required
+            className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password (min 6 characters)"
+            required
+            minLength={6}
             className="animated-input w-full px-4 py-3 rounded-xs text-body-sm text-text-primary placeholder:text-text-muted"
           />
           <button
