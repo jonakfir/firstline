@@ -7,6 +7,7 @@ create table if not exists profiles (
   stripe_customer_id text,
   plan text default 'free',
   leads_used_this_month int default 0,
+  api_key text unique,
   created_at timestamptz default now()
 );
 

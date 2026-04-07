@@ -16,6 +16,9 @@ const PLAN_LABELS: Record<string, { name: string; limit: string }> = {
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -35,7 +38,33 @@ export default function SettingsPage() {
       setLoading(false);
     }
     fetchProfile();
+
+    // Fetch API key
+    fetch("/api/v1/key")
+      .then((r) => r.json())
+      .then((d) => setApiKey(d.api_key || null))
+      .catch(() => {});
   }, [supabase]);
+
+  const generateApiKey = async () => {
+    setApiKeyLoading(true);
+    try {
+      const res = await fetch("/api/v1/key", { method: "POST" });
+      const data = await res.json();
+      if (data.api_key) setApiKey(data.api_key);
+    } catch {
+      // ignore
+    }
+    setApiKeyLoading(false);
+  };
+
+  const copyKey = () => {
+    if (apiKey) {
+      navigator.clipboard.writeText(apiKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (loading) {
     return <div className="text-body-sm text-text-muted">Loading...</div>;
@@ -106,6 +135,62 @@ export default function SettingsPage() {
               Upgrade plan →
             </a>
           )}
+        </div>
+
+        <div className="spotlight-card rounded-sm p-6">
+          <h2 className="text-caption uppercase tracking-widest text-text-muted mb-4">
+            API Access
+          </h2>
+          <p className="text-body-sm text-text-secondary mb-4">
+            Use your API key to generate openers programmatically.
+          </p>
+
+          {apiKey ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <code className="flex-1 px-3 py-2 bg-bg-primary border border-border rounded-xs text-body-sm text-text-muted font-mono truncate">
+                  {apiKey}
+                </code>
+                <button
+                  onClick={copyKey}
+                  className="px-3 py-2 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm shrink-0"
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <button
+                onClick={generateApiKey}
+                disabled={apiKeyLoading}
+                className="text-body-sm text-text-muted hover:text-red-400 transition-colors"
+              >
+                {apiKeyLoading ? "Regenerating..." : "Regenerate key"}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={generateApiKey}
+              disabled={apiKeyLoading}
+              className="px-4 py-2.5 rounded-xs bg-bg-tertiary border border-border hover:border-border-hover transition-colors text-body-sm font-medium disabled:opacity-50"
+            >
+              {apiKeyLoading ? "Generating..." : "Generate API key"}
+            </button>
+          )}
+
+          <div className="mt-6 p-4 bg-bg-primary border border-border rounded-xs">
+            <p className="text-caption uppercase tracking-widest text-text-muted mb-3">
+              Example usage
+            </p>
+            <pre className="text-body-sm text-text-secondary font-mono whitespace-pre-wrap break-all">
+{`curl -X POST https://firstline-six.vercel.app/api/v1/generate \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "leads": [
+      {"name": "Sarah Chen", "company": "Stripe"}
+    ]
+  }'`}
+            </pre>
+          </div>
         </div>
       </div>
     </div>
