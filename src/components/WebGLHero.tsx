@@ -118,7 +118,7 @@ function Scene() {
 
 export default function WebGLHero() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 hidden md:block">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 60 }}
         dpr={[1, 2]}

@@ -96,7 +96,7 @@ export default function LandingPage() {
             AI-powered cold email openers
           </p>
 
-          <h1 className="hero-fade-up hero-fade-up-2 font-serif text-display-xl md:text-[7rem] leading-[0.95] tracking-[-0.04em] mb-8">
+          <h1 className="hero-fade-up hero-fade-up-2 font-serif text-[3rem] sm:text-display-xl md:text-[7rem] leading-[0.95] tracking-[-0.04em] mb-8">
             The first line
             <br />
             <span className="italic text-accent-lime">that opens</span>

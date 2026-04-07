@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const supabase = createClient();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("error") === "auth_failed") {
+      setError("Authentication failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleOAuth = async (provider: "google" | "linkedin_oidc") => {
     setLoading(true);
@@ -17,18 +26,19 @@ export default function LoginPage() {
       provider,
       options: { redirectTo: `${window.location.origin}/api/auth/callback` },
     });
-    if (error) setMessage(error.message);
+    if (error) setError("Could not connect to sign-in provider. Please try again.");
     setLoading(false);
   };
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
     });
-    if (error) setMessage(error.message);
+    if (error) setError("Could not send login link. Please try again.");
     else setMessage("Check your email for the login link.");
     setLoading(false);
   };
@@ -44,6 +54,12 @@ export default function LoginPage() {
         <Link href="/" className="block mb-12">
           <img src="/logo.svg" alt="Firstline" className="h-7" />
         </Link>
+
+        {error && (
+          <div className="mb-6 px-4 py-3 rounded-xs bg-red-500/10 border border-red-500/20 text-body-sm text-red-400">
+            {error}
+          </div>
+        )}
 
         <h1 className="font-serif text-heading-lg mb-2">Welcome back</h1>
         <p className="text-body-sm text-text-secondary mb-8">
@@ -112,5 +128,13 @@ export default function LoginPage() {
         </p>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-primary" />}>
+      <LoginContent />
+    </Suspense>
   );
 }
