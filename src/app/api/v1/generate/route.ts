@@ -1,13 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { enrichLinkedIn, fetchCompanyNews } from "@/lib/enrichment";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
-let _anthropic: Anthropic | null = null;
-function getAnthropic() {
-  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  return _anthropic;
+async function callClaude(prompt: string): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 100,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Claude API error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text?.trim() || "";
 }
 
 interface LeadInput {
@@ -135,18 +151,9 @@ export async function POST(req: NextRequest) {
         const context = contextParts.join("\n");
 
         // Generate with Claude
-        const message = await getAnthropic().messages.create({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 100,
-          messages: [
-            {
-              role: "user",
-              content: `Write a single sentence (max 20 words) personalized cold email opener for this person. Be specific. Reference something real from their profile or company news. Do not mention the sender. Do not start with "I". Make it feel human and researched.\n\nContext:\n${context}`,
-            },
-          ],
-        });
-
-        const openingLine = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+        const openingLine = await callClaude(
+          `Write a single sentence (max 20 words) personalized cold email opener for this person. Be specific. Reference something real from their profile or company news. Do not mention the sender. Do not start with "I". Make it feel human and researched.\n\nContext:\n${context}`
+        );
 
         results.push({
           name: lead.name,

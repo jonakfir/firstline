@@ -1,14 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 import { enrichLinkedIn, fetchCompanyNews, verifyEmail } from "@/lib/enrichment";
 
-let _anthropic: Anthropic | null = null;
-function getAnthropic() {
-  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  return _anthropic;
+async function callClaude(prompt: string): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": process.env.ANTHROPIC_API_KEY!,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 100,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Claude API error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text?.trim() || "";
 }
 
 export async function POST(req: NextRequest) {
@@ -70,19 +86,9 @@ export async function POST(req: NextRequest) {
 
             // Generate opening line with Claude
             const context = buildContext(lead, enrichedData);
-            const message = await getAnthropic().messages.create({
-              model: "claude-sonnet-4-20250514",
-              max_tokens: 100,
-              messages: [
-                {
-                  role: "user",
-                  content: `Write a single sentence (max 20 words) personalized cold email opener for this person. Be specific. Reference something real from their profile or company news. Do not mention the sender. Do not start with "I". Make it feel human and researched.\n\nContext:\n${context}`,
-                },
-              ],
-            });
-
-            const generatedLine =
-              message.content[0].type === "text" ? message.content[0].text.trim() : "";
+            const generatedLine = await callClaude(
+              `Write a single sentence (max 20 words) personalized cold email opener for this person. Be specific. Reference something real from their profile or company news. Do not mention the sender. Do not start with "I". Make it feel human and researched.\n\nContext:\n${context}`
+            );
 
             // Update lead in database
             await getSupabaseAdmin()
