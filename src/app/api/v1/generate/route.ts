@@ -152,7 +152,24 @@ export async function POST(req: NextRequest) {
 
         // Generate with Claude
         const openingLine = await callClaude(
-          `Write a complete, short personalized cold email for this person. The email should:\n- Start with a personalized opening line referencing something real from their profile or company news\n- Be 3-5 sentences total\n- Include a clear, specific value proposition\n- End with a soft call to action (e.g. "Worth a quick chat?")\n- Do not include a subject line\n- Do not include greetings like "Hi [Name]" — start directly with the personalized opener\n- Do not include a sign-off or signature\n- Make it feel human, researched, and conversational — not salesy\n\nContext:\n${context}`
+          `Write a short personalized cold email body for this person. 3-5 sentences max.
+
+STRICT STYLE RULES — follow these exactly:
+- Write like a real human sales rep, not an AI. Vary your sentence structure.
+- NEVER use em dashes (—). Use periods or commas instead.
+- NEVER use semicolons.
+- Avoid Oxford commas.
+- Do NOT start with "I noticed" or "I saw" — vary your openings. Try: a direct compliment, a question, a bold statement, referencing a specific detail.
+- Each email must feel structurally different from the others. Mix up sentence lengths. Some short. Some longer.
+- No buzzwords like "leverage", "synergy", "cutting-edge", "game-changing".
+- Sound like a text from a smart friend, not a pitch deck.
+- Be specific. Name a real thing from their news or profile. Don't be vague.
+- End with a casual CTA. Vary it: "Quick call?", "Open to chatting?", "Want me to show you?", "15 min this week?", etc.
+- No subject line. No greeting (no "Hi Jensen"). No sign-off. Just the body.
+- No bullet points or lists. Just flowing sentences.
+
+Context:
+${context}`
         );
 
         results.push({
