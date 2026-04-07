@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect } from "react";
 
 interface SpotlightCardProps {
   children: React.ReactNode;
@@ -14,24 +14,47 @@ export default function SpotlightCard({
   delay = 0,
 }: SpotlightCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
 
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      el.style.transitionDelay = `${delay}s`;
+      el.classList.add("scroll-revealed");
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay * 1000);
-          observer.unobserve(el);
+          reveal();
+          observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0, rootMargin: "50px" }
     );
-
     observer.observe(el);
-    return () => observer.disconnect();
+
+    const check = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 50 && rect.bottom > -50) {
+        reveal();
+        observer.disconnect();
+        window.removeEventListener("scroll", check);
+      }
+    };
+
+    const raf = requestAnimationFrame(check);
+    window.addEventListener("scroll", check, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener("scroll", check);
+    };
   }, [delay]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -47,12 +70,7 @@ export default function SpotlightCard({
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`spotlight-card rounded-sm p-6 ${className}`}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(30px)",
-        transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-      }}
+      className={`spotlight-card scroll-reveal rounded-sm p-6 ${className}`}
     >
       {children}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -13,46 +13,57 @@ export default function ScrollReveal({
   children,
   className = "",
   delay = 0,
-  direction = "up",
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      el.style.transitionDelay = `${delay}s`;
+      el.classList.add("scroll-revealed");
+    };
+
+    // Use IntersectionObserver
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay * 1000);
-          observer.unobserve(el);
+          reveal();
+          observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0, rootMargin: "50px" }
     );
-
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
 
-  const transform = !isVisible
-    ? direction === "up"
-      ? "translateY(40px)"
-      : direction === "left"
-      ? "translateX(-40px)"
-      : "translateX(40px)"
-    : "translateY(0) translateX(0)";
+    // Fallback: check on scroll + immediate rAF check
+    const check = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 50 && rect.bottom > -50) {
+        reveal();
+        observer.disconnect();
+        window.removeEventListener("scroll", check);
+      }
+    };
+
+    const raf = requestAnimationFrame(check);
+    window.addEventListener("scroll", check, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener("scroll", check);
+    };
+  }, [delay]);
 
   return (
     <div
       ref={ref}
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform,
-        transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
-      }}
+      className={`scroll-reveal ${className}`}
     >
       {children}
     </div>
